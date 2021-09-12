@@ -2,7 +2,7 @@
 
 '''
 CPSC 415 -- Homework #2 template
-Stephen Davies, University of Mary Washington, fall 2021
+Arsalan Ahmad, University of Mary Washington, fall 2021
 '''
 
 from atlas import Atlas
