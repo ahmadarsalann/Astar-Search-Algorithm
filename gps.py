@@ -19,6 +19,7 @@ def find_best_path(atlas):
     of that path.'''
 
     # THIS IS WHERE YOUR AMAZING CODE GOES
+    
 
     # Here's a (bogus) example return value:
     return ([0,3,2,4],970)
