@@ -20,6 +20,7 @@ class Atlas():
         self._paths_expanded = []
         self._nodes_expanded = set()
 
+
     def get_road_dist(self, i, j):
         self._paths_expanded.append((i,j))
         self._nodes_expanded |= {i}

@@ -5,6 +5,7 @@ CPSC 415 -- Homework #2 template
 Arsalan Ahmad, University of Mary Washington, fall 2021
 '''
 
+from math import inf
 from atlas import Atlas
 import numpy as np
 import logging
@@ -19,7 +20,28 @@ def find_best_path(atlas):
     of that path.'''
 
     # THIS IS WHERE YOUR AMAZING CODE GOES
-    
+    atlas = Atlas(5)
+    full_list = atlas._adj_mat
+    x = atlas._adj_mat[0]
+    y = [i[0] for i in full_list]
+    all_heroistic = []
+    nodes = []
+    track_combos = {}
+    connects = {"Connects": [], "Value": []}
+    for a in range(len(x)):
+        for b in range(len(y)):
+                if full_list[a][b] != 0 and full_list[a][b] != inf:
+                    nodes.append(a)
+                    connects['Connects'].append(b)
+                    connects['Value'].append(full_list[a][b])
+
+    i = 0
+    for key, value in connects:
+        track_combos.add(set(key, nodes[i]))
+        i = i + 1
+
+
+
 
     # Here's a (bogus) example return value:
     return ([0,3,2,4],970)
