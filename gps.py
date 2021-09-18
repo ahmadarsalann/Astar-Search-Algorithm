@@ -6,6 +6,8 @@ Arsalan Ahmad, University of Mary Washington, fall 2021
 '''
 
 from math import inf
+
+from numpy.random.mtrand import rand
 from atlas import Atlas
 import numpy as np
 import logging
@@ -20,28 +22,39 @@ def find_best_path(atlas):
     of that path.'''
 
     # THIS IS WHERE YOUR AMAZING CODE GOES
-    atlas = Atlas(5)
     full_list = atlas._adj_mat
     x = atlas._adj_mat[0]
     y = [i[0] for i in full_list]
-    all_heroistic = []
-    nodes = []
-    track_combos = {}
-    connects = {"Connects": [], "Value": []}
+    track_combos = []
+    history = []
     for a in range(len(x)):
         for b in range(len(y)):
                 if full_list[a][b] != 0 and full_list[a][b] != inf:
-                    nodes.append(a)
-                    connects['Connects'].append(b)
-                    connects['Value'].append(full_list[a][b])
+                    track_combos.append([a, b, full_list[a][b]])
+    
+    history = track_combos.copy()
+    print(track_combos)
+    l = 0
+    for i in range(len(history)):
+        if i == len(history):
+            break
+        for f in range(len(track_combos)):
+            if track_combos[f][0] == history[i][0] and track_combos[f][1] == history[i][1] or track_combos[f][0] == history[i][1] and track_combos[f][1] == history[i][0]:
+                l = l + 1
+            if l == 2:
+                history.pop(f)
+                track_combos.pop(f)
+                l = 0
+                break
+    
+    # to set a heroistic
+    for i in range(len(history)):
+        heroistic = atlas.get_crow_flies_dist(history[i][0], history[i][1])
+        history[i].append(heroistic)
 
-    i = 0
-    for key, value in connects:
-        track_combos.add(set(key, nodes[i]))
-        i = i + 1
-
-
-
+    print(history)
+    
+    
 
     # Here's a (bogus) example return value:
     return ([0,3,2,4],970)
