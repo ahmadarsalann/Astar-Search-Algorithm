@@ -5,7 +5,7 @@ CPSC 415 -- Homework #2 template
 Arsalan Ahmad, University of Mary Washington, fall 2021
 '''
 
-from math import inf
+from math import dist, inf
 
 from numpy.random.mtrand import rand
 from atlas import Atlas
@@ -33,7 +33,6 @@ def find_best_path(atlas):
                     track_combos.append([a, b, full_list[a][b]])
     
     history = track_combos.copy()
-    print(track_combos)
     l = 0
     for i in range(len(history)):
         if i == len(history):
@@ -52,10 +51,58 @@ def find_best_path(atlas):
         heroistic = atlas.get_crow_flies_dist(history[i][0], history[i][1])
         history[i].append(heroistic)
 
+    goal = 0
+    index1 = 0
+    index2 = 0
+    for i in range(len(history)):
+        if history[i][0] > index1:
+            index1 = history[i][0]
+        
+        if history[i][1] > index2:
+            index2 = history[i][1]
+
+    if index1 > index2:
+        goal = index1
+    else:
+        goal = index2
+    # time to do the A* search Algorithm
+    Visited = []
+    a = 0
+    for i in range(len(history)):
+        if history[i][0] == a:
+            Visited.append([history[i][0], history[i][1]])
+            distance = atlas.get_road_dist(history[i][0], history[i][1])
+            Visited[i].append(distance)
+            Visited[i].append(distance + history[i][3])
+            
+    possible_answer = 0
+    answer = 0
+    b = 0
+    i = 0
+    reached = False
+    while i < len(Visited) and reached is not True:
+        next = atlas.find_the_next_heroistic(history, Visited, reached)
+        reached = atlas.node_expansion(next, atlas, goal, reached)
+        while b < len(Visited):
+            if b == len(Visited) - 1:
+                b = 0
+                break
+            if Visited[b][1] == next[0][0]:
+                Visited.pop(b)
+                b = 0
+            b = b + 1
+        i = i + 1
+        if i >= len(Visited):
+            i = 0
     print(history)
     
-    
 
+
+                
+    # print(history)
+    # print(Visited)
+    # print(lowest_heroistic)
+    
     # Here's a (bogus) example return value:
     return ([0,3,2,4],970)
 
