@@ -76,6 +76,7 @@ def find_best_path(atlas):
         else:
             increment = 0
 
+    #time to find the path
     path = []
     for i in range(len(track_nodes)):
         if i == 0:
@@ -84,11 +85,13 @@ def find_best_path(atlas):
         else:
             if path[i] == track_nodes[i][0]:
                 path.append(track_nodes[i][1])
+    #time to get the distance
+    cost = track_nodes[0][2] + track_nodes[len(track_nodes) - 1][2]
     print(track_nodes)
-    print(path)  
+    print(path)
               
     # Here's a (bogus) example return value:
-    return ([0,3,2,4],970)
+    return (path,cost)
 
 def find_the_next_path(Visited):
     lowest_path_plus_hero = Visited[0]
