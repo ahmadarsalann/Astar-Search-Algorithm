@@ -5,7 +5,7 @@ CPSC 415 -- Homework #2 template
 Arsalan Ahmad, University of Mary Washington, fall 2021
 '''
 
-from math import dist, inf
+from math import dist, fabs, inf
 from os import terminal_size
 
 from numpy.random.mtrand import rand
@@ -32,7 +32,7 @@ def find_best_path(atlas):
         if first_node != inf and first_node != 0:
             hero = atlas.get_crow_flies_dist(i, goal)
             Visited.append([0, i, first_node, hero])
-    print(Visited)
+    #print(Visited)
     b = 0
     i = 0
     reached = False
@@ -41,41 +41,12 @@ def find_best_path(atlas):
         next = find_the_next_path(Visited)
         track_nodes.append(next)
         if next[1] == total_cities - 1:
-            print(next[1])
+            #print(next[1])
             break
         extend = extend_combo(next[1], Visited, total_cities, atlas, goal, track_nodes)
         i = i + 1   
-    print(track_nodes)
-    count = []
-    number = 0
-    temp_track = track_nodes.copy()
-    for i in range(len(track_nodes)):
-        for j in range(len(track_nodes)):
-            if j == len(track_nodes) - 1:
-                number = 0
-            if track_nodes[j][0] == temp_track[i][0]:
-                number = number + 1
-            if number > 1:
-                count.append([i, track_nodes[i][0]])
-                number = 0
-    a = 0
-    check = 0
-    increment = 0
-    for i in range(len(track_nodes)):
-        if a == len(count):
-            break
-        if count[a][0] == i:
-            check = track_nodes[i][1]
-            a = a + 1
-            for j in range(len(track_nodes)):
-                if check == track_nodes[j][0]:
-                    increment = increment + 1
-        
-        if increment == 0:
-            track_nodes.pop(i)
-        else:
-            increment = 0
-
+    #print(track_nodes)
+    remove(track_nodes)
     #time to find the path
     path = []
     for i in range(len(track_nodes)):
@@ -86,12 +57,59 @@ def find_best_path(atlas):
             if path[i] == track_nodes[i][0]:
                 path.append(track_nodes[i][1])
     #time to get the distance
-    cost = track_nodes[0][2] + track_nodes[len(track_nodes) - 1][2]
-    print(track_nodes)
-    print(path)
-              
-    # Here's a (bogus) example return value:
+    cost = total_path_cost(path, atlas)
+    
     return (path,cost)
+
+def remove(track_nodes):
+    count = []
+    number = 0
+    temp_track = track_nodes.copy()
+    for i in range(len(track_nodes)):
+        for j in range(len(track_nodes)):
+            if j == len(track_nodes):
+                number = 0
+            if track_nodes[j][0] == temp_track[i][0]:
+                number = number + 1
+        if number > 1:
+            count.append([i, track_nodes[i][0]])
+            number = 0
+        number = 0
+    a = 0
+    check = 0
+    increment = 0
+    goes_to_if = False
+    i = 0
+    c = a
+    while i < len(track_nodes):
+        if a == len(count):
+            break
+        if i is len(track_nodes):
+            break
+        if count[a][0] == i:
+            goes_to_if = True
+            check = track_nodes[i][1]
+            a = a + 1
+            c = a
+            for j in range(len(track_nodes)):
+                if check == track_nodes[j][0]:
+                    if j > i:
+                        increment = increment + 1
+        
+        if increment == 0 and goes_to_if:
+            track_nodes.pop(i)
+            if a == len(count):
+                break
+            while c < len(count):
+                count[c][0] = count[c][0] - 1
+                c = c + 1
+            i = i - 1
+            goes_to_if = False
+        else:
+            increment = 0
+            i = i + 1
+            goes_to_if = False
+
 
 def find_the_next_path(Visited):
     lowest_path_plus_hero = Visited[0]
@@ -110,12 +128,19 @@ def find_the_next_path(Visited):
 def extend_combo(next, Visited, total_cities, atlas, goal, track_nodes):
     prev_node = 0
     a = 0
+    track2 = False
     for i in range(total_cities):
         next_node = atlas.get_road_dist(next, i)
-        if a == 0:
+        if a == 0 and len(track_nodes) != 1:
             for i in range(len(track_nodes)):
                 if track_nodes[i][1] == next:
                     prev_node = prev_node + atlas.get_road_dist(track_nodes[i][0], next)
+                    if track_nodes[i][1] > 0:
+                        track2 = True
+                if track2 == True:
+                    for j in range(len(track_nodes)):
+                        if track_nodes[i][0] == track_nodes[j][1]:
+                            prev_node = prev_node + atlas.get_road_dist(track_nodes[j][0], track_nodes[j][1])
         a = a + 1
         if next_node != inf and next_node != 0 and i != track_nodes[0][0] and i != next:
             hero = atlas.get_crow_flies_dist(i, goal)
@@ -128,7 +153,15 @@ def extend_combo(next, Visited, total_cities, atlas, goal, track_nodes):
                 if Visited[i][1] == next:
                     Visited.pop(i)
         
-
+def total_path_cost(path, atlas):
+    j = 1
+    totalcost = 0
+    for i in range(len(path)):
+        totalcost = totalcost + atlas.get_road_dist(path[i], path[j])
+        j = j + 1 
+        if i == len(path) - 2:
+            break
+    return totalcost
 
 if __name__ == '__main__':
 
