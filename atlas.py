@@ -2,7 +2,6 @@
 CPSC 415 -- Homework #2 support file
 Stephen Davies, University of Mary Washington, fall 2021
 '''
-
 import numpy as np
 import math
 import pickle
@@ -20,51 +19,6 @@ class Atlas():
         self._paths_expanded = []
         self._nodes_expanded = set()
 
-    def find_the_next_heroistic(self, history, visited, reached):
-        if not reached:
-            track_heroistic = []
-            for i in range(len(visited)):
-                track_heroistic.append([visited[i][0], visited[i][1], visited[i][2], visited[i][3]])
-            
-            low_heroistic = track_heroistic[0]
-            for i in range(len(track_heroistic)):
-                if low_heroistic[2] > track_heroistic[i][2]:
-                    low_heroistic = track_heroistic[i]
-
-            expand_node = 0
-            for i in range(len(visited)):
-                if visited[i][3] == low_heroistic[3]:
-                    expand_node = visited[i][1]
-
-            expand_pair = []
-            for i in range(len(history)):
-                if history[i][0] == expand_node:
-                    expand_pair.append(history[i])
-
-            temp_list = low_heroistic.copy()
-            if self.count > 0:
-                low_heroistic[2] = low_heroistic[2] - low_heroistic[3]
-
-            if not expand_pair:
-                visited.remove(temp_list)
-                self.count + 1
-                return self.find_the_next_heroistic(history, visited, reached)
-            else:
-                for i in range(len(expand_pair)):
-                    expand_pair[i][2] = low_heroistic[2] + expand_pair[i][2] + expand_pair[i][3]
-                visited.extend(expand_pair)
-                self.count = self.count + 1
-                return expand_pair
-        else:
-            return reached
-    
-    def node_expansion(self, next, atlas, goal, reached):
-        for i in range(len(next)):
-            distance = atlas.get_road_dist(next[i][0], next[i][1])
-            print(self._nodes_expanded)
-            if goal == next[i][1]:
-                reached = True
-        return reached
 
     def get_road_dist(self, i, j):
         self._paths_expanded.append((i,j))

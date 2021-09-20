@@ -6,6 +6,7 @@ Arsalan Ahmad, University of Mary Washington, fall 2021
 '''
 
 from math import dist, inf
+from os import terminal_size
 
 from numpy.random.mtrand import rand
 from atlas import Atlas
@@ -22,90 +23,108 @@ def find_best_path(atlas):
     of that path.'''
 
     # THIS IS WHERE YOUR AMAZING CODE GOES
-    full_list = atlas._adj_mat
-    x = atlas._adj_mat[0]
-    y = [i[0] for i in full_list]
-    track_combos = []
-    history = []
-    for a in range(len(x)):
-        for b in range(len(y)):
-                if full_list[a][b] != 0 and full_list[a][b] != inf:
-                    track_combos.append([a, b, full_list[a][b]])
-    
-    history = track_combos.copy()
-    l = 0
-    for i in range(len(history)):
-        if i == len(history):
-            break
-        for f in range(len(track_combos)):
-            if track_combos[f][0] == history[i][0] and track_combos[f][1] == history[i][1] or track_combos[f][0] == history[i][1] and track_combos[f][1] == history[i][0]:
-                l = l + 1
-            if l == 2:
-                history.pop(f)
-                track_combos.pop(f)
-                l = 0
-                break
-    
-    # to set a heroistic
-    for i in range(len(history)):
-        heroistic = atlas.get_crow_flies_dist(history[i][0], history[i][1])
-        history[i].append(heroistic)
-
-    goal = 0
-    index1 = 0
-    index2 = 0
-    for i in range(len(history)):
-        if history[i][0] > index1:
-            index1 = history[i][0]
-        
-        if history[i][1] > index2:
-            index2 = history[i][1]
-
-    if index1 > index2:
-        goal = index1
-    else:
-        goal = index2
-    # time to do the A* search Algorithm
+    first_node = 0
     Visited = []
-    a = 0
-    for i in range(len(history)):
-        if history[i][0] == a:
-            Visited.append([history[i][0], history[i][1]])
-            distance = atlas.get_road_dist(history[i][0], history[i][1])
-            Visited[i].append(distance)
-            Visited[i].append(distance + history[i][3])
-            
-    possible_answer = 0
-    answer = 0
+    goal = atlas.get_num_cities() - 1
+    total_cities = atlas.get_num_cities()
+    for i in range(total_cities):
+        first_node = atlas.get_road_dist(0, i)
+        if first_node != inf and first_node != 0:
+            hero = atlas.get_crow_flies_dist(i, goal)
+            Visited.append([0, i, first_node, hero])
+    print(Visited)
     b = 0
     i = 0
     reached = False
-    while i < len(Visited) and reached is not True:
-        next = atlas.find_the_next_heroistic(history, Visited, reached)
-        reached = atlas.node_expansion(next, atlas, goal, reached)
-        while b < len(Visited):
-            if b == len(Visited) - 1:
-                b = 0
-                break
-            if Visited[b][1] == next[0][0]:
-                Visited.pop(b)
-                b = 0
-            b = b + 1
-        i = i + 1
-        if i >= len(Visited):
-            i = 0
-    print(history)
-    
+    track_nodes = []
+    while True:
+        next = find_the_next_path(Visited)
+        track_nodes.append(next)
+        if next[1] == total_cities - 1:
+            print(next[1])
+            break
+        extend = extend_combo(next[1], Visited, total_cities, atlas, goal, track_nodes)
+        i = i + 1   
+    print(track_nodes)
+    count = []
+    number = 0
+    temp_track = track_nodes.copy()
+    for i in range(len(track_nodes)):
+        for j in range(len(track_nodes)):
+            if j == len(track_nodes) - 1:
+                number = 0
+            if track_nodes[j][0] == temp_track[i][0]:
+                number = number + 1
+            if number > 1:
+                count.append([i, track_nodes[i][0]])
+                number = 0
+    a = 0
+    check = 0
+    increment = 0
+    for i in range(len(track_nodes)):
+        if a == len(count):
+            break
+        if count[a][0] == i:
+            check = track_nodes[i][1]
+            a = a + 1
+            for j in range(len(track_nodes)):
+                if check == track_nodes[j][0]:
+                    increment = increment + 1
+        
+        if increment == 0:
+            track_nodes.pop(i)
+        else:
+            increment = 0
 
-
-                
-    # print(history)
-    # print(Visited)
-    # print(lowest_heroistic)
-    
+    path = []
+    for i in range(len(track_nodes)):
+        if i == 0:
+            path.append(track_nodes[i][0])
+            path.append(track_nodes[i][1])
+        else:
+            if path[i] == track_nodes[i][0]:
+                path.append(track_nodes[i][1])
+    print(track_nodes)
+    print(path)  
+              
     # Here's a (bogus) example return value:
     return ([0,3,2,4],970)
 
+def find_the_next_path(Visited):
+    lowest_path_plus_hero = Visited[0]
+    # print(track_list)
+    i = 0
+    while i < len(Visited):
+        if Visited[i][3] + Visited[i][2] < lowest_path_plus_hero[3] + lowest_path_plus_hero[2]:
+            lowest_path_plus_hero = Visited[i]
+            Visited.pop(i)
+            i = i - 1
+        i = i + 1
+
+    next_path = lowest_path_plus_hero
+    return next_path
+    
+def extend_combo(next, Visited, total_cities, atlas, goal, track_nodes):
+    prev_node = 0
+    a = 0
+    for i in range(total_cities):
+        next_node = atlas.get_road_dist(next, i)
+        if a == 0:
+            for i in range(len(track_nodes)):
+                if track_nodes[i][1] == next:
+                    prev_node = prev_node + atlas.get_road_dist(track_nodes[i][0], next)
+        a = a + 1
+        if next_node != inf and next_node != 0 and i != track_nodes[0][0] and i != next:
+            hero = atlas.get_crow_flies_dist(i, goal)
+            Visited.append([next, i, next_node + prev_node, hero])
+
+        if i == total_cities - 1:
+            for i in range(len(Visited)):
+                if i == len(Visited):
+                    break
+                if Visited[i][1] == next:
+                    Visited.pop(i)
+        
 
 
 if __name__ == '__main__':
